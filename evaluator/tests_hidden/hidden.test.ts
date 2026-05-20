@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { EventLedger, FakeExternalProvider, InMemoryLedgerStore, buildReconciliationSummary } from "../../solution/src/handlers.js";
 import type { ExternalEvent } from "../../solution/src/types.js";
+
+const target = await import(process.env.EVAL_TARGET ?? "../../solution/src/handlers.js");
+const {
+  EventLedger,
+  FakeExternalProvider,
+  InMemoryLedgerStore,
+  buildReconciliationSummary,
+} = target as typeof import("../../solution/src/handlers.js");
 
 function event(overrides: Partial<ExternalEvent> = {}): ExternalEvent {
   return {

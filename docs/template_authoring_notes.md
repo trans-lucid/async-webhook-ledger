@@ -37,3 +37,11 @@ Staff:
 ## Local Simulator Guidance
 
 Keep Docker Compose candidate-facing and predictable. Use Testcontainers only in hidden evaluator generation when the environment supports it.
+
+Public integration coverage must include at least one test that exercises:
+
+```txt
+LocalStack SQS -> queueConsumer -> Postgres ledger -> WireMock provider -> reconciliation state
+```
+
+Fast unit tests are still useful, but they are not enough for this template to count as production-shaped.

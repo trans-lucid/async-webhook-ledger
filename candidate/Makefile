@@ -8,8 +8,10 @@ logs:
 
 seed:
 	npm install
-	psql "$${DATABASE_URL:-postgres://postgres:postgres@localhost:5432/webhooks}" -f migrations/001_init.sql
+	npx tsx src/migrate.ts
 	python3 ../generators/generate_fixture.py --scenario public --seed 20260519 --out fixtures/public/public_events.jsonl
+	AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_REGION=us-east-1 \
+		npx tsx src/queueSetup.ts
 
 test:
 	npm run test:public

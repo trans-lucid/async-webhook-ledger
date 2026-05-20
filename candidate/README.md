@@ -16,6 +16,8 @@ make clean
 
 `make dev` starts Postgres, LocalStack SQS, WireMock, and MailHog. The app must not require real cloud credentials.
 
+`make test` expects the local services to be running. It includes an integration test that sends duplicate messages through LocalStack SQS, drains them with `src/queueConsumer.ts`, writes Postgres ledger rows, calls the WireMock provider, and verifies duplicate side effects are suppressed.
+
 ## Focus Areas
 
 - `src/eventLedger.ts`: receipt, uniqueness, and event status
@@ -25,4 +27,4 @@ make clean
 
 ## Public Test Contract
 
-Public tests verify the basics: duplicate suppression, invalid event rejection, out-of-order recovery, and reconciliation output shape. Hidden tests add concurrent delivery, provider timeout ambiguity, worker crash redelivery, and harder event streams.
+Public tests verify the basics: duplicate suppression, invalid event rejection, out-of-order recovery, reconciliation output shape, and one local production-simulator path. Hidden tests add concurrent delivery, provider timeout ambiguity, worker crash redelivery, and harder event streams.

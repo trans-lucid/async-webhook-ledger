@@ -8,6 +8,7 @@ create table if not exists webhook_events (
   status text not null,
   rejection_reason text,
   attempts integer not null default 0,
+  duplicate_deliveries integer not null default 0,
   side_effect_key text,
   payload jsonb not null,
   first_seen_at timestamptz not null default now(),

@@ -39,6 +39,16 @@ npm run validate
 
 That command regenerates public and hidden fixtures, then verifies the reference implementation against public and hidden behavioral tests.
 
+The Docker-backed public integration path is candidate-facing and runs from `candidate/`:
+
+```bash
+make dev
+make seed
+npm run test:public:integration
+```
+
+That integration test sends duplicate messages through LocalStack SQS, drains them through `queueConsumer`, persists state in Postgres, calls the WireMock provider, and asserts the production path suppresses duplicate side effects.
+
 ## Production Simulator
 
 The candidate-facing simulator uses:

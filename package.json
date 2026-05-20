@@ -5,8 +5,12 @@
   "scripts": {
     "generate:fixtures": "python3 generators/generate_fixture.py --scenario public --seed 20260519 --out candidate/fixtures/public/public_events.jsonl",
     "generate:hidden-fixtures": "python3 generators/generate_fixture.py --scenario hidden --seed 20260519 --out evaluator/fixtures_hidden/hidden_events.jsonl",
-    "test:solution": "vitest run solution/tests/reference.test.ts evaluator/tests_hidden/hidden.test.ts",
-    "validate": "npm run generate:fixtures && npm run generate:hidden-fixtures && npm run test:solution"
+    "test:solution": "vitest run --exclude generated/** solution/tests/reference.test.ts evaluator/tests_hidden/hidden.test.ts",
+    "validate:solution": "rm -rf generated && npm run generate:fixtures && npm run generate:hidden-fixtures && npm run test:solution",
+    "validate:candidate-main-expected-failure": "bash tools/expect_candidate_failure.sh",
+    "render": "python3 tools/render_template.py",
+    "scan:safety": "python3 tools/scan_safety.py",
+    "validate": "npm run validate:solution && npm run validate:candidate-main-expected-failure && npm run render && npm run scan:safety"
   },
   "devDependencies": {
     "@types/node": "^22.15.29",

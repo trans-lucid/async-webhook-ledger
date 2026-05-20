@@ -6,6 +6,8 @@
     "dev": "tsx src/server.ts",
     "worker": "tsx src/queueConsumer.ts",
     "test:public": "vitest run tests/public",
+    "test:public:unit": "vitest run tests/public/public.test.ts",
+    "test:public:integration": "vitest run tests/public/integration.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
