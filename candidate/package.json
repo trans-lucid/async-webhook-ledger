@@ -4,6 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsx src/server.ts",
+    "migrate": "tsx src/migrate.ts",
+    "queue:setup": "tsx src/queueSetup.ts",
     "worker": "tsx src/queueConsumer.ts",
     "test:public": "vitest run tests/public",
     "test:public:unit": "vitest run tests/public/public.test.ts",
