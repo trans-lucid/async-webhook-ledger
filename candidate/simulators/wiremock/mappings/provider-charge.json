@@ -1,0 +1,16 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/provider/charges"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "providerChargeId": "local-charge-{{jsonPath request.body '$.sideEffectKey'}}",
+      "status": "accepted"
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

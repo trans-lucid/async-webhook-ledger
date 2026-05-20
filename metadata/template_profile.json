@@ -1,0 +1,16 @@
+{
+  "id": "async-webhook-ledger",
+  "title": "Async Webhook Ledger",
+  "short_description": "Repair webhook processing with idempotent event ledgers, safe retries, and reconciliation reports.",
+  "roles": ["Backend", "Staff Backend", "Full-stack", "Platform"],
+  "difficulty": ["medium", "hard", "staff"],
+  "time_minutes": [60, 120],
+  "tags": ["typescript", "postgres", "localstack", "wiremock", "webhooks", "idempotency"],
+  "visible_in_ui": true,
+  "card": {
+    "skill_signal": "Idempotency, retry safety, out-of-order events, auditability",
+    "candidate_receives": "Express-style service, event fixtures, local queue/database simulator, failing public tests, ledger stubs",
+    "hidden_evaluator": "Concurrent duplicates, provider timeout ambiguity, crash redelivery, stale lifecycle state, support report quality",
+    "personalization_level": "Business nouns, provider names, fixture schemas, incident framing, and hidden emphasis"
+  }
+}

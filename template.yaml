@@ -1,0 +1,104 @@
+id: async-webhook-ledger
+title: Async Webhook Ledger
+version: 0.1.0
+status: golden-template
+summary: >
+  A production-simulator challenge for idempotent webhook processing,
+  durable event ledgers, out-of-order state transitions, retry safety,
+  and operator-readable reconciliation.
+roles:
+  - Backend
+  - Staff Backend
+  - Full-stack
+  - Platform
+seniority:
+  - Senior
+  - Staff
+  - Principal
+stacks:
+  - TypeScript
+  - Node
+  - Express
+  - Postgres
+  - LocalStack
+  - WireMock
+signals:
+  - webhook
+  - stripe
+  - github app
+  - resend
+  - slack events
+  - retry
+  - idempotency
+  - queue redelivery
+  - out-of-order events
+  - reconciliation
+evaluation_axes:
+  - idempotency
+  - state consistency
+  - retry safety
+  - schema awareness
+  - queue redelivery safety
+  - external side-effect safety
+  - operator visibility
+difficulty_knobs:
+  medium:
+    events: 40
+    hidden_cases: 4
+    concurrent_duplicates: false
+    crash_redelivery: false
+    provider_timeout_after_side_effect: true
+  hard:
+    events: 150
+    hidden_cases: 8
+    concurrent_duplicates: true
+    crash_redelivery: true
+    provider_timeout_after_side_effect: true
+  staff:
+    events: 400
+    hidden_cases: 12
+    concurrent_duplicates: true
+    crash_redelivery: true
+    provider_timeout_after_side_effect: true
+    multi_account_reconciliation: true
+    support_report_required: true
+local_environment:
+  required:
+    - docker
+    - docker-compose
+    - node
+  public_services:
+    - name: postgres
+      purpose: persisted ledger and business state
+    - name: localstack
+      purpose: local SQS webhook delivery queue
+    - name: wiremock
+      purpose: fake external payment/order provider
+    - name: mailhog
+      purpose: local support notification sink
+  hidden_services:
+    - name: testcontainers
+      purpose: strict ephemeral integration environment in rendered challenges
+  no_external_credentials: true
+  no_cloud_calls: true
+candidate_contract:
+  main_includes:
+    - runnable starter repo
+    - public tests
+    - public fixtures
+    - README
+    - DEBRIEF
+    - local simulator config
+  main_excludes:
+    - hidden tests
+    - rubric
+    - solution files
+    - evaluator fixtures
+template_contains_private_material: true
+forbidden:
+  - one-file-helper
+  - parser-only
+  - no-tests
+  - cloud-credential-required
+  - hardcoded-public-fixtures
+  - copying-startup-source

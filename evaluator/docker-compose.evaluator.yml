@@ -1,0 +1,25 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: webhooks_hidden
+    ports:
+      - "55432:5432"
+
+  localstack:
+    image: localstack/localstack:3.5
+    environment:
+      SERVICES: sqs,s3
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+    ports:
+      - "4567:4566"
+
+  wiremock:
+    image: wiremock/wiremock:3.6.0
+    command: ["--global-response-templating", "--verbose"]
+    ports:
+      - "8090:8080"

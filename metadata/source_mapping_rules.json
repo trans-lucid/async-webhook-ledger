@@ -1,0 +1,54 @@
+{
+  "async-webhook-ledger": {
+    "positive_signals": [
+      "webhook",
+      "stripe",
+      "resend",
+      "github app",
+      "slack event",
+      "event",
+      "retry",
+      "idempotency",
+      "queue",
+      "sqs",
+      "worker",
+      "billing",
+      "outbox",
+      "ledger",
+      "reconciliation"
+    ],
+    "negative_signals": [
+      "static portfolio",
+      "pure frontend",
+      "no persistence",
+      "batch-only analytics"
+    ],
+    "stacks": ["typescript", "node", "python", "go", "postgres", "express", "fastify", "nestjs"],
+    "roles": ["backend", "staff backend", "platform", "full-stack"],
+    "evaluation_axes": [
+      "idempotency",
+      "state consistency",
+      "partial failure",
+      "queue redelivery",
+      "observability",
+      "operator visibility"
+    ],
+    "score_weights": {
+      "stack_match": 0.3,
+      "domain_signal_match": 0.25,
+      "role_seniority_match": 0.2,
+      "evaluation_axis_match": 0.15,
+      "recruiter_preference_match": 0.1
+    },
+    "personalization_fields": [
+      "provider_name",
+      "business_object_name",
+      "tenant_noun",
+      "event_type_names",
+      "fixture_payload_fields",
+      "README incident framing",
+      "hidden failure emphasis"
+    ],
+    "recommended_when": "Use when the source repo has webhook handlers, queue workers, billing/customer lifecycle events, retry paths, or durable event tables."
+  }
+}

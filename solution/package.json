@@ -1,0 +1,13 @@
+{
+  "name": "async-webhook-ledger-solution",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run tests/reference.test.ts ../evaluator/tests_hidden/hidden.test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.29",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.4"
+  }
+}

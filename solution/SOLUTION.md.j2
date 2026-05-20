@@ -1,0 +1,12 @@
+# Solution Notes
+
+The durable fix is to treat webhook processing as a stateful, transactional workflow:
+
+1. Validate and ledger every delivery before applying business state.
+2. Use provider event IDs and side-effect keys as stable idempotency boundaries.
+3. Suppress duplicate deliveries before external side effects.
+4. Preserve ambiguous provider outcomes so a retry does not double-apply a side effect.
+5. Reduce business state from lifecycle semantics rather than delivery order.
+6. Return reconciliation notes that identify rejected, failed, duplicate, and pending states.
+
+The strongest implementations should make this guarantee through database uniqueness and transaction boundaries, not process-local maps. The reference implementation in this template is intentionally compact for template validation; generated challenges should require the production Postgres path.

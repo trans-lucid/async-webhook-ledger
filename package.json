@@ -1,0 +1,16 @@
+{
+  "name": "@translucid-template/async-webhook-ledger",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate:fixtures": "python3 generators/generate_fixture.py --scenario public --seed 20260519 --out candidate/fixtures/public/public_events.jsonl",
+    "generate:hidden-fixtures": "python3 generators/generate_fixture.py --scenario hidden --seed 20260519 --out evaluator/fixtures_hidden/hidden_events.jsonl",
+    "test:solution": "vitest run solution/tests/reference.test.ts evaluator/tests_hidden/hidden.test.ts",
+    "validate": "npm run generate:fixtures && npm run generate:hidden-fixtures && npm run test:solution"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.29",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.4"
+  }
+}

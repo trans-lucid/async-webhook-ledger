@@ -1,0 +1,54 @@
+# {{ challenge_title | default("Async Webhook Ledger") }}
+
+You are joining the backend team for {{ company_context | default("a B2B workflow platform") }}. A webhook ingestion service processes external events from providers such as payment processors, app marketplaces, and customer notification systems.
+
+The service currently works in the happy path, but production incidents show unsafe behavior under duplicate delivery, retries, provider timeouts, out-of-order events, and process restarts.
+
+Your task is to make event processing idempotent, durable, and explainable.
+
+## What You Need To Fix
+
+- Record every received event in a durable ledger.
+- Reject invalid events without crashing the worker.
+- Prevent duplicate side effects when the same provider event is delivered more than once.
+- Handle out-of-order lifecycle events without losing the final business state.
+- Make queue redelivery safe after a worker crash.
+- Produce an operator-readable reconciliation summary.
+
+## Local Environment
+
+This challenge uses a local production simulator. No external credentials are needed.
+
+```bash
+make dev
+make seed
+make test
+make run
+```
+
+Services:
+
+- Postgres: persisted event ledger and business records
+- LocalStack SQS: local webhook delivery queue
+- WireMock: fake external provider API
+- MailHog: local support notification sink
+
+## Public Tests
+
+Public tests cover the basic contract:
+
+- ledger receipt
+- duplicate suppression
+- invalid event rejection
+- out-of-order recovery
+- reconciliation output shape
+
+Hidden tests use harder fixtures with concurrent duplicates, provider timeouts after side effects, crash redelivery, and misleading public-fixture shortcuts.
+
+## Deliverables
+
+1. Fix the production path in `src/`.
+2. Keep the app runnable through the provided Makefile.
+3. Answer the questions in `DEBRIEF.md`.
+
+Do not require cloud credentials, call external services, or bypass the queue/database path.

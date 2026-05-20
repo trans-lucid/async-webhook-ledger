@@ -1,0 +1,31 @@
+{
+  "no_external_credentials": true,
+  "no_cloud_calls": true,
+  "allowed_personalization": [
+    "language",
+    "domain framing",
+    "business nouns",
+    "fixture field names",
+    "README context",
+    "difficulty knobs",
+    "hidden-test emphasis"
+  ],
+  "forbidden_personalization": [
+    "copying startup source files",
+    "copying private schemas verbatim",
+    "using real customer data",
+    "embedding proprietary endpoints",
+    "including hidden tests on generated candidate main",
+    "including SOLUTION.md on generated candidate main"
+  ],
+  "required_scans": [
+    "gitleaks or equivalent secret scan",
+    "path scan for source repo absolute paths",
+    "candidate branch scan for evaluator and solution files"
+  ],
+  "fake_credentials": {
+    "AWS_ACCESS_KEY_ID": "test",
+    "AWS_SECRET_ACCESS_KEY": "test",
+    "DATABASE_URL": "postgres://postgres:postgres@localhost:5432/webhooks"
+  }
+}
