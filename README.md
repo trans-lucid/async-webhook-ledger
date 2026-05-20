@@ -84,3 +84,29 @@ The candidate must repair the production path across multiple files:
 ## Source Use Policy
 
 This template may be personalized from a startup repo profile, but it must not copy startup source files. Personalization is limited to stack, business nouns, scenario names, fixture field names, README context, and hidden-test emphasis.
+
+## For Challenge Creation Agents
+
+Do not infer how to use this template from README prose.
+
+Read `translucid-template.json`.
+
+Normal use:
+
+```bash
+make render
+make scan-safety
+make validate-solution
+make validate-candidate-main-expected-failure
+make validate-docker-integration
+```
+
+Use:
+
+- `generated/main` as candidate-facing main branch
+- `generated/solution` as private solution/evaluator branch
+
+Do not manually copy `candidate/` to root.
+Do not manually restructure `solution/`.
+Do not edit hidden tests or evaluator imports unless a validation command fails and the exact blocker is recorded.
+
