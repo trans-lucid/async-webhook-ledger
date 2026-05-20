@@ -8,6 +8,7 @@
     "test:solution": "vitest run --exclude generated/** solution/tests/reference.test.ts evaluator/tests_hidden/hidden.test.ts",
     "validate:solution": "rm -rf generated && npm run generate:fixtures && npm run generate:hidden-fixtures && npm run test:solution",
     "validate:candidate-main-expected-failure": "bash tools/expect_candidate_failure.sh",
+    "validate:docker-integration": "bash tools/expect_candidate_docker_failure.sh",
     "render": "python3 tools/render_template.py",
     "scan:safety": "python3 tools/scan_safety.py",
     "validate": "npm run validate:solution && npm run validate:candidate-main-expected-failure && npm run render && npm run scan:safety"

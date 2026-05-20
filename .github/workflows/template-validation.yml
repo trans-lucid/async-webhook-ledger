@@ -18,3 +18,4 @@ jobs:
       - run: npm run validate:candidate-main-expected-failure
       - run: npm run render
       - run: npm run scan:safety
+      - run: npm run validate:docker-integration

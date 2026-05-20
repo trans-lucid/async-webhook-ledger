@@ -49,6 +49,14 @@ npm run test:public:integration
 
 That integration test sends duplicate messages through LocalStack SQS, drains them through `queueConsumer`, persists state in Postgres, calls the WireMock provider, and asserts the production path suppresses duplicate side effects.
 
+Template CI also runs:
+
+```bash
+npm run validate:docker-integration
+```
+
+That command starts Docker Compose, seeds the local simulator, runs the Docker-backed public integration test, and requires the unsolved starter to fail for the expected duplicate-delivery defect.
+
 ## Production Simulator
 
 The candidate-facing simulator uses:

@@ -14,11 +14,20 @@ export function createSqsClient() {
 }
 
 export async function ensureQueue(client = createSqsClient()) {
-  const response = await client.send(new CreateQueueCommand({ QueueName: queueName }));
-  if (!response.QueueUrl) {
-    throw new Error("LocalStack did not return a QueueUrl");
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= 20; attempt += 1) {
+    try {
+      const response = await client.send(new CreateQueueCommand({ QueueName: queueName }));
+      if (!response.QueueUrl) {
+        throw new Error("LocalStack did not return a QueueUrl");
+      }
+      return response.QueueUrl;
+    } catch (error) {
+      lastError = error;
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
   }
-  return response.QueueUrl;
+  throw lastError instanceof Error ? lastError : new Error(String(lastError));
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
