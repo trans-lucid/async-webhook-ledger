@@ -1,23 +1,27 @@
+.PHONY: install render scan-safety check-render validate-solution validate-candidate-main-expected-failure validate-docker-integration validate
 
-.PHONY: render scan-safety check-render validate-solution validate-candidate-main-expected-failure validate-docker-integration validate
+node_modules/.package-lock.json: package-lock.json package.json
+	npm ci
 
-render:
+install: node_modules/.package-lock.json
+
+render: install
 	npm run render
 
-scan-safety:
+scan-safety: install
 	npm run scan:safety
 
-check-render:
+check-render: install
 	npm run check:render
 
-validate-solution:
+validate-solution: install
 	npm run validate:solution
 
-validate-candidate-main-expected-failure:
+validate-candidate-main-expected-failure: install
 	npm run validate:candidate-main-expected-failure
 
-validate-docker-integration:
+validate-docker-integration: install
 	npm run validate:docker-integration
 
-validate:
+validate: install
 	npm run validate
