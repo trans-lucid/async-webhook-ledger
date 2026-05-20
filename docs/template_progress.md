@@ -11,4 +11,4 @@
 - render_context_support: present
 - check_render_contract: present
 - scan_safety_uses_manifest: present
-- remote_ci_manifest_validation: pending
+- remote_ci_manifest_validation: passed
