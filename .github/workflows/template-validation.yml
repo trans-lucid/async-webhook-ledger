@@ -39,6 +39,9 @@ jobs:
       - name: Safety scan
         run: make scan-safety
 
+      - name: Validate personalization
+        run: make validate-personalization
+
       - name: Docker-backed integration expected failure
         run: make validate-docker-integration
 

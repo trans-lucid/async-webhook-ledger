@@ -11,8 +11,9 @@
     "validate:docker-integration": "bash tools/expect_candidate_docker_failure.sh",
     "render": "python3 tools/render_template.py",
     "scan:safety": "python3 tools/scan_safety.py",
-    "validate": "npm run validate:solution && npm run validate:candidate-main-expected-failure && npm run render && npm run check:render && npm run scan:safety && npm run validate:docker-integration",
-    "check:render": "python3 tools/check_render_contract.py"
+    "validate": "npm run validate:solution && npm run validate:candidate-main-expected-failure && npm run render && npm run check:render && npm run scan:safety && npm run validate:personalization && npm run validate:docker-integration",
+    "check:render": "python3 tools/check_render_contract.py",
+    "validate:personalization": "python3 tools/validate_personalization.py"
   },
   "devDependencies": {
     "@types/node": "^22.15.29",

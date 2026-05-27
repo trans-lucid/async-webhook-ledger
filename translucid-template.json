@@ -38,5 +38,61 @@
     "source-dossiers/",
     "template.yaml",
     "metadata/"
-  ]
+  ],
+  "validate_personalization_command": "make validate-personalization",
+  "personalization_contract": {
+    "difficulty_levels": [
+      "junior",
+      "senior",
+      "staff"
+    ],
+    "allowed_focus_axes": [
+      "idempotency",
+      "event ordering",
+      "retry safety",
+      "queue draining",
+      "operator reconciliation"
+    ],
+    "scenario_knobs": {
+      "entity_count": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "failure_modes": [
+        "basic",
+        "multi_step",
+        "ambiguous"
+      ],
+      "hidden_strictness": [
+        "basic",
+        "production",
+        "adversarial"
+      ],
+      "reporting_depth": [
+        "short",
+        "operator",
+        "executive_plus_operator"
+      ]
+    },
+    "generator_commands": [
+      "python3 generators/generate_fixture.py --scenario public --profile template_context.json --out candidate/fixtures/public/public_events.jsonl"
+    ],
+    "candidate_forbidden_markers": [
+      "## Personalized Context",
+      "source_profile",
+      "source_profile_summary",
+      "SOLUTION.md",
+      "source-dossiers",
+      "private evaluator material",
+      "hidden_test_emphasis"
+    ],
+    "solution_cue_requirements": [
+      "focus being evaluated",
+      "expected failure classes",
+      "hidden test intent",
+      "scoring rubric",
+      "debrief answer cues"
+    ]
+  }
 }

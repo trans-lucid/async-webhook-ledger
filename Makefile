@@ -1,4 +1,4 @@
-.PHONY: install render scan-safety check-render validate-solution validate-candidate-main-expected-failure validate-docker-integration validate
+.PHONY: validate-personalization install render scan-safety check-render validate-solution validate-candidate-main-expected-failure validate-docker-integration validate
 
 node_modules/.package-lock.json: package-lock.json package.json
 	npm ci
@@ -22,6 +22,9 @@ validate-candidate-main-expected-failure: install
 
 validate-docker-integration: install
 	npm run validate:docker-integration
+
+validate-personalization: install
+	npm run validate:personalization
 
 validate: install
 	npm run validate
