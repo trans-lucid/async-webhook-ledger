@@ -1,4 +1,4 @@
-.PHONY: dev logs seed test run clean
+.PHONY: dev logs wait-services seed test run clean
 
 dev:
 	docker compose up -d
@@ -6,7 +6,10 @@ dev:
 logs:
 	docker compose logs -f
 
-seed:
+wait-services:
+	python3 scripts/wait_services.py
+
+seed: wait-services
 	npm install
 	npm run migrate
 	python3 ../generators/generate_fixture.py --scenario public --seed 20260519 --out fixtures/public/public_events.jsonl
