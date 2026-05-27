@@ -22,6 +22,14 @@ def load_profile(path: str | None) -> dict:
 
 
 def profile_settings(profile: dict, scenario: str, seed: int, count: int) -> tuple[int, int, float, float, float, float]:
+    hidden = scenario == "hidden"
+    if not profile:
+        duplicate_rate = 0.35 if hidden else 0.18
+        invalid_rate = 0.10 if hidden else 0.08
+        out_of_order_rate = 0.35 if hidden else 0.20
+        timeout_rate = 0.12 if hidden else 0.0
+        return seed, count, duplicate_rate, invalid_rate, out_of_order_rate, timeout_rate
+
     scenario_profile = profile.get("scenario_profile") if isinstance(profile.get("scenario_profile"), dict) else {}
     difficulty = str(profile.get("difficulty") or profile.get("difficulty_profile") or "senior").lower()
     entity_count = scenario_profile.get("entity_count", "medium")
@@ -29,7 +37,6 @@ def profile_settings(profile: dict, scenario: str, seed: int, count: int) -> tup
     if profile:
         seed = int(profile.get("generator_seed") or seed)
         count = COUNT_BY_ENTITY.get(str(entity_count), count)
-    hidden = scenario == "hidden"
     duplicate_rate = 0.16
     invalid_rate = 0.04
     out_of_order_rate = 0.08
@@ -91,7 +98,7 @@ def generate(scenario: str, seed: int, count: int, profile: dict | None = None) 
         for offset, event_type in enumerate(lifecycle):
             flags = {}
             provider_event_id = f"{base_id}_{offset}"
-            if rng.random() < timeout_rate:
+            if timeout_rate > 0 and rng.random() < timeout_rate:
                 flags["provider_timeout_after_side_effect"] = True
             event = build_event("fixture-payments", provider_event_id, event_type, account, order, i + offset, flags)
             events.append(event)
