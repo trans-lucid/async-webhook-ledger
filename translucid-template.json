@@ -40,6 +40,7 @@
     "metadata/"
   ],
   "validate_personalization_command": "make validate-personalization",
+  "check_published_repo_command": "make check-published-repo",
   "personalization_contract": {
     "difficulty_levels": [
       "junior",

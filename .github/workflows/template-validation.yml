@@ -36,11 +36,17 @@ jobs:
       - name: Check render contract
         run: make check-render
 
+      - name: Check published repo contract
+        run: make check-published-repo
+
       - name: Safety scan
         run: make scan-safety
 
       - name: Validate personalization
         run: make validate-personalization
+
+      - name: Check personalized published repo contract
+        run: make check-published-repo
 
       - name: Docker-backed integration expected failure
         run: make validate-docker-integration

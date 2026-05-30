@@ -149,6 +149,7 @@ def render_candidate_text(template: str, context: dict) -> str:
     selected = selected_option(context)
     replacements = {
         "company_name": context.get("company_name", ""),
+        "company_context": context.get("company_description") or context.get("company_name", ""),
         "challenge_title": context.get("challenge_title", ""),
         "role": context.get("role", ""),
         "theme": context.get("theme", ""),
@@ -162,6 +163,11 @@ def render_candidate_text(template: str, context: dict) -> str:
     for key, value in replacements.items():
         rendered = rendered.replace("{{ " + key + " }}", _safe_scalar(value))
         rendered = rendered.replace("{{" + key + "}}", _safe_scalar(value))
+        rendered = re.sub(
+            r"{{\s*" + re.escape(key) + r"\s*\|\s*default\((['\"])(.*?)\1\)\s*}}",
+            lambda match, replacement=_safe_scalar(value): replacement or match.group(2),
+            rendered,
+        )
     block = candidate_scenario_block(context)
     return rendered.rstrip() + ("\n" + block if block else "") + "\n"
 
@@ -181,8 +187,6 @@ def apply_template_context(rendered_root: Path) -> None:
 
 def write_solution_personalization(solution_root: Path) -> None:
     context = load_template_context()
-    if not context:
-        return
     manifest = load_manifest()
     profile = profile_payload(context, include_private=True)
     expected = manifest.get("expected_failure_markers", [])

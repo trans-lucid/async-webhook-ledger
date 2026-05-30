@@ -12,7 +12,7 @@ wait-services:
 seed: wait-services
 	npm install
 	npm run migrate
-	python3 ../generators/generate_fixture.py --scenario public --seed 20260519 --out fixtures/public/public_events.jsonl
+	test -f fixtures/public/public_events.jsonl
 	AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_REGION=us-east-1 \
 		npm run queue:setup
 
