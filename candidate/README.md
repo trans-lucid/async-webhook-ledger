@@ -7,6 +7,7 @@ Fix the production path so event processing is idempotent, durable, and explaina
 ## Commands
 
 ```bash
+make setup
 make dev
 make seed
 make test
@@ -27,4 +28,4 @@ make clean
 
 ## Public Test Contract
 
-Public tests verify the basics: duplicate suppression, invalid event rejection, out-of-order recovery, reconciliation output shape, and one local production-simulator path. Hidden tests add concurrent delivery, provider timeout ambiguity, worker crash redelivery, and harder event streams.
+Public tests verify the basics: duplicate suppression, invalid event rejection, out-of-order recovery, reconciliation output shape, and one local production-simulator path.

@@ -9,9 +9,10 @@
     "validate:solution": "rm -rf generated && npm run generate:fixtures && npm run generate:hidden-fixtures && npm run test:solution",
     "validate:candidate-main-expected-failure": "bash tools/expect_candidate_failure.sh",
     "validate:docker-integration": "bash tools/expect_candidate_docker_failure.sh",
+    "validate:published-contract": "python3 tools/validate_published_repo_contract.py",
     "render": "python3 tools/render_template.py",
     "scan:safety": "python3 tools/scan_safety.py",
-    "validate": "npm run validate:solution && npm run validate:candidate-main-expected-failure && npm run render && npm run check:render && npm run check:published-repo && npm run scan:safety && npm run validate:personalization && npm run check:published-repo && npm run validate:docker-integration",
+    "validate": "npm run validate:solution && npm run validate:candidate-main-expected-failure && npm run render && npm run check:render && npm run check:published-repo && npm run scan:safety && npm run validate:personalization && npm run check:published-repo && npm run validate:docker-integration && npm run validate:published-contract",
     "check:render": "python3 tools/check_render_contract.py",
     "validate:personalization": "python3 tools/validate_personalization.py",
     "check:published-repo": "python3 tools/check_published_repo_contract.py --candidate-dir generated/main --solution-dir generated/solution --manifest translucid-template.json"

@@ -95,29 +95,19 @@ def safe_business_terms(context: dict) -> list[str]:
     return terms[:12]
 
 
-def candidate_scenario_block(context: dict) -> str:
+def readme_context_block(context: dict) -> str:
     if not context:
         return ""
-    lines = ["", "## Scenario Variant"]
-    title = _safe_scalar(context.get("challenge_title") or TEMPLATE_TITLE, 160)
-    lines.append(f"- Challenge: {title}")
-    if context.get("company_name"):
-        lines.append(f"- Company context: {_safe_scalar(context['company_name'], 120)}")
-    if context.get("role"):
-        lines.append(f"- Role: {_safe_scalar(context['role'], 120)}")
-    if context.get("time_limit"):
-        lines.append(f"- Time limit: {_safe_scalar(context['time_limit'], 80)}")
-    lines.append(f"- Difficulty: {difficulty(context)}")
-    lines.append(f"- Focus: {focus(context)}")
-    axes = evaluation_axes(context)
-    if axes:
-        lines.append("- Evaluation axes: " + ", ".join(axes))
-    lines.append(f"- Scenario: {scenario_summary(context)}")
-    terms = safe_business_terms(context)
-    if terms:
-        lines.append("- Domain terms: " + ", ".join(terms))
-    lines.append("")
-    return "\n".join(lines)
+    sentences: list[str] = []
+    company = _safe_scalar(context.get("company_description") or context.get("company_name") or "", 220)
+    selected_focus = focus(context)
+    if company:
+        sentences.append(f"This scenario is framed around {company}.")
+    if selected_focus and selected_focus != "production debugging":
+        sentences.append(f"The production focus is {selected_focus}.")
+    if not sentences:
+        return ""
+    return "\n\n## Context\n\n" + " ".join(sentences) + "\n"
 
 
 def profile_payload(context: dict, include_private: bool = False) -> dict:
@@ -144,7 +134,7 @@ def profile_payload(context: dict, include_private: bool = False) -> dict:
     }
 
 
-def render_candidate_text(template: str, context: dict) -> str:
+def render_candidate_text(template: str, context: dict, *, include_context: bool = False) -> str:
     rendered = template
     selected = selected_option(context)
     replacements = {
@@ -153,7 +143,6 @@ def render_candidate_text(template: str, context: dict) -> str:
         "challenge_title": context.get("challenge_title", ""),
         "role": context.get("role", ""),
         "theme": context.get("theme", ""),
-        "time_limit": context.get("time_limit", ""),
         "company_description": context.get("company_description", ""),
         "difficulty": difficulty(context),
         "difficulty_profile": difficulty(context),
@@ -168,8 +157,8 @@ def render_candidate_text(template: str, context: dict) -> str:
             lambda match, replacement=_safe_scalar(value): replacement or match.group(2),
             rendered,
         )
-    block = candidate_scenario_block(context)
-    return rendered.rstrip() + ("\n" + block if block else "") + "\n"
+    block = readme_context_block(context) if include_context else ""
+    return rendered.rstrip() + (block if block else "") + "\n"
 
 
 def apply_template_context(rendered_root: Path) -> None:
@@ -178,11 +167,7 @@ def apply_template_context(rendered_root: Path) -> None:
         source = ROOT / f"{name}.j2"
         target = rendered_root / name
         if source.exists():
-            target.write_text(render_candidate_text(source.read_text(), context))
-    if context:
-        artifact = rendered_root / "fixtures" / "public" / "personalization_profile.json"
-        artifact.parent.mkdir(parents=True, exist_ok=True)
-        artifact.write_text(json.dumps(profile_payload(context, include_private=False), indent=2, sort_keys=True) + "\n")
+            target.write_text(render_candidate_text(source.read_text(), context, include_context=(name == "README.md")))
 
 
 def write_solution_personalization(solution_root: Path) -> None:
@@ -237,6 +222,27 @@ def copytree(src: Path, dst: Path) -> None:
     shutil.copytree(src, dst, ignore=ignore)
 
 
+def overlay_solution_root(solution_root: Path) -> None:
+    source_root = ROOT / "solution"
+    solved_src = source_root / "src"
+    if solved_src.exists():
+        target_src = solution_root / "src"
+        target_src.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(
+            solved_src,
+            target_src,
+            dirs_exist_ok=True,
+            ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache", "*.egg-info", ".DS_Store"),
+        )
+    for rel in ("traces",):
+        source = source_root / rel
+        target = solution_root / rel
+        if source.exists():
+            if target.exists():
+                shutil.rmtree(target)
+            shutil.copytree(source, target, ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache", "*.egg-info", ".DS_Store"))
+
+
 def run_profile_generator(rendered_root: Path) -> None:
     context_path = ROOT / "template_context.json"
     if not context_path.exists():
@@ -264,8 +270,9 @@ def main() -> None:
     copytree(ROOT / "candidate", SOLUTION)
     apply_template_context(SOLUTION)
     run_profile_generator(SOLUTION)
-    shutil.copytree(ROOT / "solution", SOLUTION / "solution", ignore=shutil.ignore_patterns("node_modules", "__pycache__", ".pytest_cache", "*.egg-info", ".DS_Store"))
-    shutil.copytree(ROOT / "evaluator", SOLUTION / "evaluator", ignore=shutil.ignore_patterns("node_modules", "__pycache__", ".pytest_cache", "*.egg-info", ".DS_Store"))
+    overlay_solution_root(SOLUTION)
+    shutil.copytree(ROOT / "solution", SOLUTION / "solution", ignore=shutil.ignore_patterns("node_modules", "__pycache__", "*.pyc", ".pytest_cache", "*.egg-info", ".DS_Store"))
+    shutil.copytree(ROOT / "evaluator", SOLUTION / "evaluator", ignore=shutil.ignore_patterns("node_modules", "__pycache__", "*.pyc", ".pytest_cache", "*.egg-info", ".DS_Store"))
     source_solution = ROOT / "solution" / "SOLUTION.md.j2"
     if source_solution.exists():
         (SOLUTION / "SOLUTION.md").write_text(render_candidate_text(source_solution.read_text(), load_template_context()))

@@ -24,8 +24,8 @@ describe("public async webhook ledger contract", () => {
     await ledger.processEvent(event());
     const second = await ledger.processEvent(event());
 
-    expect(second.duplicate).toBe(true);
-    expect(provider.calls).toHaveLength(1);
+    expect(second.duplicate, "duplicate_deliveries: duplicate event must be recorded without reprocessing").toBe(true);
+    expect(provider.calls, "duplicate_deliveries: duplicate provider event must not repeat side effects").toHaveLength(1);
   });
 
   it("rejects malformed events and includes them in reconciliation", async () => {
@@ -47,6 +47,9 @@ describe("public async webhook ledger contract", () => {
     await ledger.processEvent(event({ providerEventId: "evt_paid_first", eventType: "order.paid" }));
     await ledger.processEvent(event({ providerEventId: "evt_created_late", eventType: "order.created" }));
 
-    expect(store.objects.get("acct_public:order_public")?.state).toBe("paid");
+    expect(
+      store.objects.get("acct_public:order_public")?.state,
+      "out_of_order_state_regression: paid must win over earlier created events"
+    ).toBe("paid");
   });
 });

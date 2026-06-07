@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import shlex
 import shutil
 import subprocess
 import sys
@@ -69,21 +70,19 @@ def assert_candidate_safe(manifest: dict) -> None:
 
 def assert_candidate_personalized(profile: dict) -> dict:
     readme = (MAIN / "README.md").read_text()
-    expected = [profile["difficulty"], profile["company_name"], profile["selected_option"]["focus"]]
+    expected = [profile["company_name"], profile["selected_option"]["focus"]]
     for value in expected:
         if value not in readme:
             raise AssertionError(f"candidate README missing safe personalization value: {value}")
-    profile_path = MAIN / "fixtures" / "public" / "personalization_profile.json"
-    if not profile_path.exists():
-        raise AssertionError("missing candidate personalization profile artifact")
-    payload = json.loads(profile_path.read_text())
-    if payload.get("difficulty") != profile["difficulty"]:
-        raise AssertionError("profile artifact difficulty does not match selected profile")
-    if payload.get("focus") != profile["selected_option"]["focus"]:
-        raise AssertionError("profile artifact focus does not match selected profile")
-    if "hidden_strictness" not in payload.get("scenario_knobs", {}):
-        raise AssertionError("profile artifact missing hidden_strictness scenario knob")
-    return payload
+    debrief = (MAIN / "DEBRIEF.md").read_text()
+    forbidden_doc_markers = ["Scenario Variant", "Time limit", "Difficulty:", "Evaluation axes:", "Domain terms"]
+    for marker in forbidden_doc_markers:
+        if marker in readme or marker in debrief:
+            raise AssertionError(f"candidate docs leaked raw personalization marker: {marker}")
+    artifact = public_personalization_artifact(load_manifest())
+    if not artifact.exists():
+        raise AssertionError(f"missing generated public personalization artifact: {artifact.relative_to(MAIN)}")
+    return {"artifact": artifact.relative_to(MAIN).as_posix(), "bytes": artifact.read_bytes().hex()}
 
 
 def assert_solution_cues(manifest: dict, profile: dict) -> None:
@@ -96,6 +95,19 @@ def assert_solution_cues(manifest: dict, profile: dict) -> None:
             raise AssertionError(f"solution personalization notes missing cue: {cue}")
     if profile["difficulty"] not in note.read_text():
         raise AssertionError("solution personalization notes missing selected difficulty")
+
+
+def public_personalization_artifact(manifest: dict) -> Path:
+    commands = manifest.get("personalization_contract", {}).get("generator_commands") or []
+    if not commands:
+        raise AssertionError("manifest missing personalization generator command")
+    parts = shlex.split(commands[0])
+    if "--out" not in parts:
+        raise AssertionError("personalization generator command missing --out")
+    rel = parts[parts.index("--out") + 1]
+    if rel.startswith("candidate/"):
+        rel = rel[len("candidate/") :]
+    return MAIN / rel
 
 
 def profile_for(difficulty: str, focus: str, seed: int, entity_count: str) -> dict:
@@ -159,15 +171,12 @@ def validate() -> None:
             payload = assert_candidate_personalized(profile)
             assert_solution_cues(manifest, profile)
             snapshots[profile["difficulty"]] = json.dumps(payload, sort_keys=True).encode()
-            if manifest.get("template_slug") == "async-webhook-ledger":
-                fixture = MAIN / "fixtures" / "public" / "public_events.jsonl"
-                if not fixture.exists():
-                    raise AssertionError("async personalized render missing public fixture")
-                snapshots[profile["difficulty"] + "_fixture"] = fixture.read_bytes()
+            fixture = public_personalization_artifact(manifest)
+            snapshots[profile["difficulty"] + "_fixture"] = fixture.read_bytes()
         if snapshots["junior"] == snapshots["staff"]:
-            raise AssertionError("personalization profile did not change between junior and staff")
-        if manifest.get("template_slug") == "async-webhook-ledger" and snapshots["junior_fixture"] == snapshots["staff_fixture"]:
-            raise AssertionError("async fixture output did not change between junior and staff")
+            raise AssertionError("personalization artifact metadata did not change between junior and staff")
+        if snapshots["junior_fixture"] == snapshots["staff_fixture"]:
+            raise AssertionError("generated public fixture output did not change between junior and staff")
     finally:
         if original is None:
             CONTEXT.unlink(missing_ok=True)

@@ -2,5 +2,6 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
-npm install
-npm run test:public
+make setup
+npm run typecheck
+npm run test:public:unit

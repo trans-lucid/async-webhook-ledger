@@ -8,6 +8,7 @@
   "validate_solution_command": "make validate-solution",
   "validate_expected_failure_command": "make validate-candidate-main-expected-failure",
   "validate_docker_command": "make validate-docker-integration",
+  "validate_published_contract_command": "make validate-published-contract",
   "validate_all_command": "make validate",
   "generated_candidate_dir": "generated/main",
   "generated_solution_dir": "generated/solution",
@@ -17,15 +18,21 @@
     "duplicate_deliveries"
   ],
   "candidate_public_commands": [
+    "make setup",
     "npm run typecheck",
     "npm run test:public:unit"
   ],
   "candidate_docker_commands": [
+    "make setup",
     "make dev",
     "make seed",
     "npm run test:public:integration",
     "make clean"
   ],
+  "candidate_expected_failure_commands": {
+    "public": "npm run test:public:unit",
+    "docker": "npm run test:public:integration"
+  },
   "forbid_manual_restructure": true,
   "candidate_main_forbidden_paths": [
     "solution/",
@@ -86,7 +93,14 @@
       "SOLUTION.md",
       "source-dossiers",
       "private evaluator material",
-      "hidden_test_emphasis"
+      "hidden_test_emphasis",
+      "hidden_strictness",
+      "Scenario Variant",
+      "Time limit",
+      "Difficulty:",
+      "Evaluation axes:",
+      "Domain terms",
+      "personalization_profile"
     ],
     "solution_cue_requirements": [
       "focus being evaluated",

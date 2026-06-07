@@ -49,6 +49,33 @@ SECRET_PATTERNS = [
     (re.compile(r"service_role", re.IGNORECASE), "Supabase service role marker"),
 ]
 
+CANDIDATE_DOC_FORBIDDEN = [
+    "Scenario Variant",
+    "Time limit",
+    "Difficulty:",
+    "Evaluation axes:",
+    "Domain terms",
+    "hidden test",
+    "hidden tests",
+    "private test",
+    "private tests",
+    "private evaluator",
+    "solution branch",
+    "SOLUTION.md",
+    "PERSONALIZATION.md",
+]
+
+CANDIDATE_TEXT_FORBIDDEN = [
+    "hidden_strictness",
+    "hidden_test_emphasis",
+    "source_profile",
+    "source_profile_summary",
+    "private evaluator material",
+    "personalization_profile",
+]
+
+DURATION_PATTERN = re.compile(r"\b\d{1,3}\s*(?:min|mins|minute|minutes)\b", re.IGNORECASE)
+
 
 def resolve_path(raw: str) -> Path:
     path = Path(raw)
@@ -160,6 +187,10 @@ def check_text_content(root: Path, branch: str, files: list[str], errors: list[s
             errors.append(f"{branch}: raw personalized context leaked in {rel}")
         if "source_profile" in text or "source_profile_summary" in text:
             errors.append(f"{branch}: source profile marker leaked in {rel}")
+        if branch == "candidate":
+            for marker in CANDIDATE_TEXT_FORBIDDEN:
+                if marker in text:
+                    errors.append(f"{branch}: internal marker leaked in {rel}: {marker}")
         if "/Users/" in text or "Documents/GitHub" in text:
             errors.append(f"{branch}: local developer path leaked in {rel}")
         for pattern, label in SECRET_PATTERNS:
@@ -213,13 +244,30 @@ def check_candidate(candidate: Path, manifest: dict[str, Any]) -> list[str]:
     for rel in ["README.md", "DEBRIEF.md"]:
         text = read_text(candidate / rel) or ""
         lowered = text.lower()
-        if "hidden test" in lowered or "private evaluator" in lowered or "solution branch" in lowered:
-            errors.append(f"candidate: private evaluation language leaked in {rel}")
+        for marker in CANDIDATE_DOC_FORBIDDEN:
+            if marker.lower() in lowered:
+                errors.append(f"candidate: forbidden candidate-facing marker in {rel}: {marker}")
+        if DURATION_PATTERN.search(text):
+            errors.append(f"candidate: candidate-facing duration leaked in {rel}")
 
     for rel in ["Makefile", "package.json"]:
         text = read_text(candidate / rel) or ""
         if "../generators" in text or " ../" in text and "seed" in text:
             errors.append(f"candidate: {rel} references template-parent paths")
+
+    manifest_public = list(manifest.get("candidate_public_commands") or [])
+    manifest_docker = list(manifest.get("candidate_docker_commands") or [])
+    expected_commands = manifest.get("candidate_expected_failure_commands") or {}
+    if "make setup" not in manifest_public:
+        errors.append("manifest: candidate_public_commands must include make setup")
+    if manifest.get("requires_docker_compose") and "make setup" not in manifest_docker:
+        errors.append("manifest: candidate_docker_commands must include make setup")
+    for mode, commands in [("public", manifest_public), ("docker", manifest_docker)]:
+        expected = expected_commands.get(mode)
+        if not expected:
+            errors.append(f"manifest: missing candidate_expected_failure_commands.{mode}")
+        elif expected not in commands:
+            errors.append(f"manifest: {mode} expected-failure command is not listed in candidate_{mode}_commands")
 
     package = parse_package(candidate / "package.json")
     if package:
@@ -249,6 +297,9 @@ def check_candidate(candidate: Path, manifest: dict[str, Any]) -> list[str]:
     result_files = [rel for rel in files if rel.startswith("results/") and rel != "results/.gitkeep"]
     if result_files:
         errors.append(f"candidate: results directory contains generated outputs: {', '.join(result_files[:5])}")
+    profile_files = [rel for rel in files if rel.endswith("personalization_profile.json")]
+    if profile_files:
+        errors.append(f"candidate: raw personalization profile artifact leaked: {', '.join(profile_files[:5])}")
 
     return errors
 
@@ -265,6 +316,8 @@ def check_solution(solution: Path, manifest: dict[str, Any]) -> list[str]:
     for required_dir in ["src", "tests/public", "solution", "evaluator"]:
         if not has_dir(solution, required_dir):
             errors.append(f"solution: missing required directory {required_dir}/")
+    if not has_path(solution, "evaluator/run_public.sh"):
+        errors.append("solution: missing evaluator/run_public.sh")
     if not has_path(solution, "evaluator/run_hidden.sh"):
         errors.append("solution: missing evaluator/run_hidden.sh")
     if not any(has_any_file_under(solution, rel) for rel in ["evaluator/tests_hidden", "tests_hidden"]):
@@ -282,6 +335,8 @@ def check_solution(solution: Path, manifest: dict[str, Any]) -> list[str]:
     if run_public:
         if "candidate" in run_public and not has_dir(solution, "candidate"):
             errors.append("solution: evaluator/run_public.sh references candidate/ but generated solution has no candidate/ directory")
+        if "make setup" not in run_public:
+            errors.append("solution: evaluator/run_public.sh must run make setup")
 
     run_hidden = read_text(solution / "evaluator/run_hidden.sh") or ""
     if run_hidden:
@@ -289,6 +344,8 @@ def check_solution(solution: Path, manifest: dict[str, Any]) -> list[str]:
             errors.append("solution: evaluator/run_hidden.sh references candidate/ but generated solution has no candidate/ directory")
         if "tests_hidden" not in run_hidden and "test:solution" not in run_hidden and "validate:solution" not in run_hidden:
             errors.append("solution: evaluator/run_hidden.sh does not appear to execute hidden tests")
+        if "find evaluator/tests_hidden" not in run_hidden:
+            errors.append("solution: evaluator/run_hidden.sh must hard-fail empty hidden test discovery")
         for script in re.findall(r"npm\s+run\s+([A-Za-z0-9:_-]+)", run_hidden):
             if script not in script_names(parse_package(solution / "package.json")):
                 errors.append(f"solution: evaluator/run_hidden.sh calls missing npm script {script}")
